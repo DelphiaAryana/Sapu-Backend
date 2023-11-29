@@ -90,12 +90,12 @@ export const Logout = async(req, res) => {
     if(!refreshToken) return res.sendStatus(204);
     const user = await Users.findAll({
         where:{
-            refresh_Token: refreshToken
+            refresh_token: refreshToken
         }
     });
     if(!user[0]) return res.sendStatus(204);
     const userId = user[0].id;
-    await Users.update({refresh_Token: null}, {
+    await Users.update({refresh_token: null}, {
         where:{
             id: userId
         }

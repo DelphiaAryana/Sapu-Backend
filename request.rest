@@ -1,7 +1,6 @@
 GET http://localhost:4000/users
 authorization: Bearerey eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsIm5hbWUiOiJBZGVsIiwiZW1haWwiOiJkZWxlcGlwaUBnbWFpbC5jb20iLCJiYWxhbmNlIjowLCJpYXQiOjE3MDEyNDkzNzcsImV4cCI6MTcwMTI0OTM5N30.rcHMtsqTs-fQ8cpKtr9nRbnK8Tdi-p6pWpkCQ9mOx10
 
-
 # Mendapatkan user berdasarkan id
 ###
 GET http://localhost:4000/users/5

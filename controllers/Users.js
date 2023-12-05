@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Users from '../models/UserModel.js';
+=======
+import Users from "../models/UserModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
+>>>>>>> c43c3dcc697e1f996214b2030542505981af4a8b
 
 export const getUsers = async (req, res) => {
   try {
@@ -116,6 +123,7 @@ export const Login = async (req, res) => {
     }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '60s',
     });
+<<<<<<< HEAD
     const refreshToken = jwt.sign({
       userId, name, email, balance,
     }, process.env.REFRESH_TOKEN_SECRET, {
@@ -156,3 +164,87 @@ export const Logout = async (req, res) => {
   res.clearCookie('refreshToken');
   return res.sendStatus(200);
 };
+=======
+    res.clearCookie('refreshToken');
+    return res.sendStatus(200);
+}
+
+export const editUser = async (req, res) => {
+    const userId = req.params.id;
+    const { name, username, email } = req.body;
+
+    try {
+        const isEmailTaken = await Users.findOne({
+            where: {
+                email: email,
+                id: { [Op.not]: userId }
+            }
+        });
+
+        if (isEmailTaken) {
+            return res.status(400).json({ msg: "Email sudah digunakan" });
+        }
+
+        // Ambil data user yang ingin diupdate
+        const existingUser = await Users.findByPk(userId);
+
+        if (!existingUser) {
+            return res.status(404).json({ msg: "User tidak ditemukan" });
+        }
+
+        // Perbarui hanya name, username, dan email
+        existingUser.name = name;
+        existingUser.username = username;
+        existingUser.email = email;
+
+        // Simpan perubahan ke database
+        await existingUser.save();
+
+        res.status(200).json({ msg: "User berhasil diupdate" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Terjadi kesalahan server" });
+    }
+};
+
+export const getUserById = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        // Cari pengguna berdasarkan ID
+        const user = await Users.findByPk(userId, {
+            attributes: ['id', 'name', 'username', 'email', 'balance']
+            // Anda dapat menambahkan atribut lain yang ingin Anda kembalikan
+        });
+
+        if (!user) {
+            return res.status(404).json({ msg: "User tidak ditemukan" });
+        }
+
+        // Kembalikan informasi pengguna
+        res.status(200).json({ user });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Terjadi kesalahan server" });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        // Hapus data user berdasarkan ID
+        const deletedRowCount = await Users.destroy({ where: { id: userId } });
+
+        // Periksa apakah data user berhasil dihapus
+        if (deletedRowCount > 0) {
+            res.status(200).json({ msg: "User berhasil dihapus" });
+        } else {
+            res.status(404).json({ msg: "User tidak ditemukan" });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Terjadi kesalahan server" });
+    }
+};
+>>>>>>> c43c3dcc697e1f996214b2030542505981af4a8b

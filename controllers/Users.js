@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Users from '../models/UserModel.js';
+import { Op } from 'sequelize';
 
 export const getUsers = async (req, res) => {
   try {
@@ -32,17 +33,41 @@ export const getUserById = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  try {
-    await Users.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.status(200).json({ msg: 'User berhasil diupdate' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: 'Terjadi kesalahan server' });
-  }
+    const userId = req.params.id;
+    const { name, username, email } = req.body;
+
+    try {
+        const isEmailTaken = await Users.findOne({
+            where: {
+                email: email,
+                id: { [Op.not]: userId }
+            }
+        });
+
+        if (isEmailTaken) {
+            return res.status(400).json({ msg: "Email sudah digunakan" });
+        }
+
+        // Ambil data user yang ingin diupdate
+        const existingUser = await Users.findByPk(userId);
+
+        if (!existingUser) {
+            return res.status(404).json({ msg: "User tidak ditemukan" });
+        }
+
+        // Perbarui hanya name, username, dan email
+        existingUser.name = name;
+        existingUser.username = username;
+        existingUser.email = email;
+
+        // Simpan perubahan ke database
+        await existingUser.save();
+
+        res.status(200).json({ msg: "User berhasil diupdate" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Terjadi kesalahan server" });
+    }
 };
 
 export const deleteUser = async (req, res) => {

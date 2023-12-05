@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import jwt from 'jsonwebtoken';
 import Users from '../models/UserModel.js';
 
@@ -18,7 +19,7 @@ export const refreshToken = async (req, res) => {
       const { name } = user[0];
       const { email } = user[0];
       const { balance } = user[0];
-      // eslint-disable-next-line no-undef
+      // eslint-disable-next-line no-undef, camelcase
       const access_token = jwt.sign({
         userId, name, email, balance,
       }, process.env.ACCESS_TOKEN_SECRET, {

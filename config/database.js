@@ -1,8 +1,7 @@
-import { Sequelize } from "sequelize";
+import { Sequelize } from 'sequelize';
 
 const db = new Sequelize('sapu_db', 'root', '', {
-    host: "localhost",
-    dialect: "mysql"
-})
-
+  host: 'localhost',
+  dialect: 'mysql',
+});
 export default db;

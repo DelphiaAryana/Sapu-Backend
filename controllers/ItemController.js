@@ -60,7 +60,7 @@ export const updateItem = async(req, res)=>{
     if(!item) return res.status(404).json({msg: "No Data Found"});
     let fileName = "";
     if (req.files === null){
-        fileName = Item.image;
+        fileName = item.image;
     } else {
         const file = req.files.file;
         const fileSize = file.data.length;

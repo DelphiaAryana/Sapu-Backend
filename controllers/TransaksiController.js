@@ -7,8 +7,8 @@ export const getTransaksi = async (req, res) => {
     const transaksi = await Transaksi.findAll({
       attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total'],
       include: [
-        { model: Users, attributes: ['id'] },
-        { model: Item, attributes: ['id'] } 
+        { model: Users, attributes: ['name'] },
+        { model: Item, attributes: ['name', 'price'] } 
       ],
     });
     res.json(transaksi);
@@ -21,40 +21,18 @@ export const getTransaksi = async (req, res) => {
 export const getTableTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll({
-      attributes: ['id', 'noHp', 'quantity', 'address', 'total'],
+      attributes: ['id', 'noHp', 'quantity', 'address', 'createdAt', 'total'],
       include: [
-        {
-          model: Users,
-          attributes: ['id', 'name'], 
-        },
-        {
-          model: Item,
-          attributes: ['id', 'name', 'price'], 
-        },
+        { model: Users, attributes: ['name'] },
+        { model: Item, attributes: ['name', 'price'] } 
       ],
     });
-
-    const formattedTransaksi = transaksi.map((trans) => ({
-      id: trans.id,
-      id_user: trans.User.id,
-      id_item: trans.Item.id,
-      noHp: trans.noHp,
-      quantity: trans.quantity,
-      address: trans.address,
-      date: trans.createdAt,
-      total: trans.total,
-      user_name: trans.User.name, 
-      item_name: trans.Item.name, 
-      item_price: trans.Item.price,
-    }));
-
-    res.json(formattedTransaksi);
+    res.json(transaksi);
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: 'Terjadi kesalahan server' });
   }
 };
-
   
   export const getTransaksiById = async (req, res) => {
     try {
@@ -75,7 +53,7 @@ export const getTableTransaksi = async (req, res) => {
 
   export const createTransaksi = async (req, res) => {
     try {
-      const { id_user, id_item, noHp, quantity, address} = req.body;
+      const { id_user, id_item, noHp, quantity, address } = req.body;
   
       const item = await Item.findByPk(id_item);
       const harga = item ? item.price : 0;

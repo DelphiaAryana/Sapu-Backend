@@ -48,3 +48,27 @@ GET http://localhost:4000/token
 
 ###
 DELETE http://localhost:4000/logout
+
+
+# TRANSAKSI
+
+###
+GET http://localhost:4000/transaksi
+
+###
+GET http://localhost:4000/transaksitable
+
+###
+GET http://localhost:4000/transaksi/1
+
+###
+POST http://localhost:4000/transaksi
+Content-Type: application/json
+{
+    "id_user": 5,
+    "id_item": 3,
+    "noHp": "082222222222",
+    "quantity": 2,
+    "address": "Kayutangi",
+    "total": 15000
+}

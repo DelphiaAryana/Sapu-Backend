@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
-import User from "./UserModel.js"; 
-import Product from "./ItemModel.js"; 
+import Users from "./UserModel.js"; 
+import Item from "./ItemModel.js"; 
 
 const { DataTypes } = Sequelize;
 
@@ -9,14 +9,14 @@ const Transaksi = db.define('transaksi', {
     id_user: {
         type: DataTypes.INTEGER,
         references: {
-            model: User,
+            model: Users,
             key: 'id'
         }
     },
     id_item: {
         type: DataTypes.INTEGER,
         references: {
-            model: Product,
+            model: Item,
             key: 'id'
         }
     },
@@ -28,8 +28,8 @@ const Transaksi = db.define('transaksi', {
     freezeTableName: true
 });
 
-Transaksi.belongsTo(User, { foreignKey: 'id_user' });
-Transaksi.belongsTo(Product, { foreignKey: 'id_item' });
+Transaksi.belongsTo(Users, { foreignKey: 'id_user' });
+Transaksi.belongsTo(Item, { foreignKey: 'id_item' });
 
 export default Transaksi;
 

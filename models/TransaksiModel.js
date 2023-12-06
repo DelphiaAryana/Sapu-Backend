@@ -4,12 +4,12 @@ import db from "../config/database.js";
 const {DataTypes} = Sequelize;
 
 const Transaksi = db.define('transaksi', {
-    name: DataTypes.STRING,
-    item: DataTypes.STRING,
-    price: DataTypes.INTEGER,
+    id_user: DataTypes.INTEGER,
+    id_item: DataTypes.INTEGER,
+    noHp: DataTypes.INTEGER,
     quantity: DataTypes.INTEGER,
     address: DataTypes.STRING,
-    date: DataTypes.STRING,
+    date: DataTypes.DATE,
     total: DataTypes.INTEGER,
 }, {
     freezeTableName: true

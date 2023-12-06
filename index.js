@@ -6,6 +6,7 @@ import db from './config/database.js';
 import router from './routes/index.js';
 import FileUpload from "express-fileupload";
 import ItemRoute from "./routes/ItemRoute.js";
+import TransaksiRoute from "./routes/TransaksiRoute.js";
 
 dotenv.config();
 const app = express();
@@ -24,5 +25,6 @@ app.use(FileUpload());
 app.use(express.static("public"));
 app.use(router);
 app.use(ItemRoute);
+app.use(TransaksiRoute);
 
 app.listen(4000, () => console.log('Server running at port 4000'));

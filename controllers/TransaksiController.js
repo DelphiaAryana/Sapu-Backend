@@ -5,11 +5,7 @@ import Item from '../models/ItemModel.js';
 export const getTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll({
-      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total'],
-      include: [
-        { model: Users, attributes: ['name'] },
-        { model: Item, attributes: ['name', 'price'] } 
-      ],
+      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total']
     });
     res.json(transaksi);
   } catch (error) {

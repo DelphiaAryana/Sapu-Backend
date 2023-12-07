@@ -1,7 +1,9 @@
 import Transaksi from '../models/TransaksiModel.js';
 import Users from '../models/UserModel.js';
 import Item from '../models/ItemModel.js';
+import { Op } from 'sequelize';
 
+// Mengambil Semua Data Transaksi
 export const getTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll({
@@ -11,6 +13,36 @@ export const getTransaksi = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: 'Terjadi kesalahan server' });
+  }
+};
+
+export const searchTransaksi = async (req, res) => {
+  try {
+    const searchQuery = req.query.search;
+
+    if (!searchQuery) {
+      return res.status(400).json({ msg: 'Search query is required' });
+    }
+
+    const transaksi = await Transaksi.findAll({
+      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total'],
+      include: [
+        { model: Users, attributes: ['name'] },
+        { model: Item, attributes: ['name', 'price'] },
+      ],
+      where: {
+        [Op.or]: [
+          { '$User.name$': { [Op.like]: `%${searchQuery}%` } },
+          { noHp: { [Op.like]: `%${searchQuery}%` } },
+          { '$Product.name$': { [Op.like]: `%${searchQuery}%` } },
+        ],
+      },
+    });
+
+    res.json(transaksi);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
@@ -64,7 +96,7 @@ export const getTableTransaksi = async (req, res) => {
         address,
         total,
       });
-  
+
       res.status(201).json(newTransaksi);
     } catch (error) {
       console.log(error);
@@ -72,6 +104,31 @@ export const getTableTransaksi = async (req, res) => {
     }
   };
   
+  export const updateBalance = async (req, res) => {
+    try {
+      const transaksiId = req.params.id;
+   
+      const transaksi = await Transaksi.findByPk(transaksiId);
+  
+      if (!transaksi) {
+        return res.status(404).json({ msg: 'Transaksi tidak ditemukan' });
+      }
+  
+      const user = await Users.findByPk(transaksi.id_user);
+      if (!user) {
+        return res.status(404).json({ msg: 'Pengguna tidak ditemukan' });
+      }
+  
+      const updatedBalance = user.balance + transaksi.total;
+      await user.update({ balance: updatedBalance });
+  
+      res.status(200).json({ msg: 'Saldo berhasil ditambahkan' });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ msg: 'Terjadi kesalahan server' });
+    }
+  };
+
   export const updateTransaksi = async (req, res) => {
     try {
       const { id } = req.params;

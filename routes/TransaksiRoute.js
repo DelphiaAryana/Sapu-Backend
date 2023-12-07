@@ -9,16 +9,15 @@ import {
     updateBalance,
     deleteTransaksi
 } from "../controllers/TransaksiController.js";
+import { adminOnly } from "../middleware/AuthUser.js";
 
 const router = express.Router();
 
-router.get('/transaksi', getTransaksi);
-router.get('/transaksi/search', searchTransaksi);
-router.get('/transaksitable', getTableTransaksi);
+router.get('/transaksi', adminOnly, getTransaksi);
+router.get('/transaksitable', adminOnly, getTableTransaksi);
 router.get('/transaksi/:id', getTransaksiById);
-router.post('/transaksi', createTransaksi);
-router.patch('/transaksi/:id', updateTransaksi);
-router.post('/transaksi/:id', updateBalance);
-router.delete('/transaksi/:id', deleteTransaksi);
+router.post('/transaksi', adminOnly, createTransaksi);
+router.patch('/transaksi/:id', adminOnly, updateTransaksi);
+router.delete('/transaksi/:id', adminOnly, deleteTransaksi);
 
 export default router;

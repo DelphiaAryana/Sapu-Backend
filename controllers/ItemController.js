@@ -1,6 +1,8 @@
 import fs from 'fs';
 import Item from "../models/ItemModel.js";
 import path from "path";
+import { Op } from 'sequelize';
+
 
 export const getItems = async(req, res)=>{
     try{
@@ -11,6 +13,29 @@ export const getItems = async(req, res)=>{
     }
 }
 
+export const searchItem = async (req, res) => {
+    try {
+      const searchQuery = req.query.search;
+  
+      if (!searchQuery) {
+        return res.status(400).json({ msg: 'Search query is required' });
+      }
+  
+      const items = await Item.findAll({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: `%${searchQuery}%` } },
+          ],
+        },
+      });
+  
+      res.json(items);
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+  
 export const getItemById = async (req, res)=>{
     try{
         const response = await Item.findOne({

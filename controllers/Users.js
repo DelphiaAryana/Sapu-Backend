@@ -15,6 +15,33 @@ export const getUsers = async (req, res) => {
   }
 };
 
+export const searchUsers = async (req, res) => {
+  try {
+    const searchQuery = req.query.search;
+
+    if (!searchQuery) {
+      return res.status(400).json({ msg: 'Search query is required' });
+    }
+
+    const response = await Users.findAll({
+      attributes: ['id', 'name', 'email', 'username', 'balance'],
+      where: {
+        [Op.or]: [
+          { name: { [Op.like]: `%${searchQuery}%` } },
+          { username: { [Op.like]: `%${searchQuery}%` } },
+          { email: { [Op.like]: `%${searchQuery}%` } },
+        ],
+      },
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+};
+
+
 export const getUserById = async (req, res) => {
   try {
     const users = await Users.findOne({

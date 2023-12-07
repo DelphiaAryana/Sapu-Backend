@@ -3,6 +3,7 @@ import Users from '../models/UserModel.js';
 import Item from '../models/ItemModel.js';
 import { Op } from 'sequelize';
 
+// Mengambil Semua Data Transaksi
 export const getTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll({

@@ -95,17 +95,24 @@ export const updateUser = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  try {
-    await Users.destroy({
-      where: {
-        id: req.params.id,
-      },
-    });
-    res.status(200).json({ msg: 'User berhasil dihapus' });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: 'Terjadi kesalahan server' });
+  const user = await Users.findOne({
+    where: {
+      id: req.params.id,
+    },
+  });
+  
+  if (!user) {
+    return res.status(404).json({ msg: 'User tidak ditemukan' });
   }
+  
+  await Users.destroy({
+    where: {
+      id: req.params.id,
+    },
+  });
+  
+  res.status(200).json({ msg: 'User berhasil dihapus' });
+  
 };
 
 export const Register = async (req, res) => {

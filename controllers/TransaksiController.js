@@ -171,17 +171,24 @@ export const getTableTransaksi = async (req, res) => {
   };
 
   export const deleteTransaksi = async (req, res) => {
-    try {
-      await Transaksi.destroy({
-        where: {
-          id: req.params.id,
-        },
-      });
-      res.status(200).json({ msg: 'Transaksi berhasil dihapus' });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ msg: 'Terjadi kesalahan server' });
+    const transaksi = await Transaksi.findOne({
+      where: {
+        id: req.params.id,
+      },
+    });
+    
+    if (!transaksi) {
+      return res.status(404).json({ msg: 'Transaksi tidak ditemukan' });
     }
+    
+    await Transaksi.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+    
+    res.status(200).json({ msg: 'Transaksi berhasil dihapus' });
+    
   };
   
   

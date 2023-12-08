@@ -4,35 +4,27 @@ import path from "path";
 import { Op } from 'sequelize';
 
 
-export const getItems = async(req, res)=>{
-    try{
-        const response = await Item.findAll();
-        res.json(response);
-    } catch (error){
-        console.log(error.message);
-    }
-}
-
-export const searchItem = async (req, res) => {
+export const getItems = async (req, res) => {
     try {
       const searchQuery = req.query.search;
   
-      if (!searchQuery) {
-        return res.status(400).json({ msg: 'Search query is required' });
+      let queryOptions = {};
+  
+      if (searchQuery) {
+        queryOptions = {
+          where: {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchQuery}%` } },
+            ],
+          },
+        };
       }
   
-      const items = await Item.findAll({
-        where: {
-          [Op.or]: [
-            { name: { [Op.like]: `%${searchQuery}%` } },
-          ],
-        },
-      });
-  
+      const items = await Item.findAll(queryOptions);
       res.json(items);
     } catch (error) {
-      console.log(error.message);
-      res.status(500).json({ msg: 'Internal server error' });
+      console.log(error);
+      res.status(500).json({ msg: 'Terjadi kesalahan server' });
     }
   };
   

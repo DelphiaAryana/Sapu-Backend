@@ -107,7 +107,7 @@ export const getTableTransaksi = async (req, res) => {
   export const updateBalance = async (req, res) => {
     try {
       const transaksiId = req.params.id;
-   
+  
       const transaksi = await Transaksi.findByPk(transaksiId);
   
       if (!transaksi) {
@@ -120,14 +120,18 @@ export const getTableTransaksi = async (req, res) => {
       }
   
       const updatedBalance = user.balance + transaksi.total;
-      await user.update({ balance: updatedBalance });
   
-      res.status(200).json({ msg: 'Saldo berhasil ditambahkan' });
+      await user.update({ balance: updatedBalance });
+
+      await transaksi.destroy();
+  
+      res.status(200).json({ msg: 'Saldo berhasil ditambahkan, dan transaksi terhapus' });
     } catch (error) {
       console.log(error);
       res.status(500).json({ msg: 'Terjadi kesalahan server' });
     }
   };
+  
 
   export const updateTransaksi = async (req, res) => {
     try {

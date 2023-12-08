@@ -10,7 +10,6 @@ router.get('/users', getUsers);
 router.get('/users/:id', getUserById);
 router.patch('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
-
 router.post('/users', Register);
 router.get('/token', refreshToken);
 

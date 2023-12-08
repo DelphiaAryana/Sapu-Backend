@@ -4,39 +4,27 @@ import { Op } from 'sequelize';
 
 export const getUsers = async (req, res) => {
   try {
-    const users = await Users.findAll({
+    let queryOptions = {
       attributes: ['id', 'uuid', 'name', 'email', 'username', 'role', 'balance'],
-    });
-    res.json(users);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: 'Terjadi kesalahan server' });
-  }
-};
+    };
 
-export const searchUsers = async (req, res) => {
-  try {
     const searchQuery = req.query.search;
 
-    if (!searchQuery) {
-      return res.status(400).json({ msg: 'Search query is required' });
-    }
-
-    const response = await Users.findAll({
-      attributes: ['id', 'name', 'email', 'username', 'balance'],
-      where: {
+    if (searchQuery) {
+      queryOptions.where = {
         [Op.or]: [
           { name: { [Op.like]: `%${searchQuery}%` } },
           { username: { [Op.like]: `%${searchQuery}%` } },
           { email: { [Op.like]: `%${searchQuery}%` } },
         ],
-      },
-    });
+      };
+    }
 
-    res.json(response);
+    const users = await Users.findAll(queryOptions);
+    res.json(users);
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ msg: 'Internal server error' });
+    console.log(error);
+    res.status(500).json({ msg: 'Terjadi kesalahan server' });
   }
 };
 

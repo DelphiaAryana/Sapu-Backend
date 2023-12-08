@@ -49,7 +49,7 @@ export const searchTransaksi = async (req, res) => {
 export const getTableTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll({
-      attributes: ['id', 'noHp', 'quantity', 'address', 'createdAt', 'total'],
+      attributes: ['id', 'noHp', 'quantity', 'address', 'date', 'total'],
       include: [
         { model: Users, attributes: ['name'] },
         { model: Item, attributes: ['name', 'price'] } 
@@ -82,6 +82,12 @@ export const getTableTransaksi = async (req, res) => {
   export const createTransaksi = async (req, res) => {
     try {
       const { id_user, id_item, noHp, quantity, address } = req.body;
+
+      const date = new Date().toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
   
       const item = await Item.findByPk(id_item);
       const harga = item ? item.price : 0;
@@ -94,6 +100,7 @@ export const getTableTransaksi = async (req, res) => {
         noHp,
         quantity,
         address,
+        date,
         total,
       });
 

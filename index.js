@@ -6,7 +6,6 @@ import session from "express-session";
 import SequelizeStore  from "connect-session-sequelize";
 import db from './config/database.js';
 import router from './routes/index.js';
-import AuthRoute from './routes/AuthRoute.js';
 import FileUpload from "express-fileupload";
 import ItemRoute from "./routes/ItemRoute.js";
 import TransaksiRoute from "./routes/TransaksiRoute.js";
@@ -44,7 +43,6 @@ app.use(express.json());
 app.use(FileUpload());
 app.use(express.static("public"));
 app.use(router);
-app.use(AuthRoute);
 app.use(ItemRoute);
 app.use(TransaksiRoute);
 

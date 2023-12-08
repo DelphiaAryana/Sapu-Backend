@@ -19,9 +19,10 @@ export const refreshToken = async (req, res) => {
       const { name } = user[0];
       const { email } = user[0];
       const { balance } = user[0];
+      const {role} = user[0];
       // eslint-disable-next-line no-undef, camelcase
       const access_token = jwt.sign({
-        userId, name, email, balance,
+        userId, name, email, balance,role
       }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '20s',
       });

@@ -18,7 +18,7 @@ router.get('/transaksitable', getTableTransaksi);
 router.get('/transaksi/:id', getTransaksiById);
 router.post('/transaksi', createTransaksi);
 router.patch('/transaksi/:id', updateTransaksi);
-router.patch('/transaksi/balance/:id', updateBalance);
+router.post('/transaksi/:id', updateBalance);
 router.delete('/transaksi/:id', deleteTransaksi);
 
 export default router;

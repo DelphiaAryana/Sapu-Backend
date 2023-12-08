@@ -86,11 +86,11 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:4000/transaksi/1
+DELETE http://localhost:4000/transaksi/17
 
 # Update saldo
 ###
-POST http://localhost:4000/transaksi/5
+PATCH http://localhost:4000/transaksi/balance/18
 
 
 # Search User

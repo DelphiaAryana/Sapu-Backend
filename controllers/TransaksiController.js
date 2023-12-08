@@ -3,46 +3,34 @@ import Users from '../models/UserModel.js';
 import Item from '../models/ItemModel.js';
 import { Op } from 'sequelize';
 
-// Mengambil Semua Data Transaksi
 export const getTransaksi = async (req, res) => {
-  try {
-    const transaksi = await Transaksi.findAll({
-      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total']
-    });
-    res.json(transaksi);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: 'Terjadi kesalahan server' });
-  }
-};
-
-export const searchTransaksi = async (req, res) => {
   try {
     const searchQuery = req.query.search;
 
-    if (!searchQuery) {
-      return res.status(400).json({ msg: 'Search query is required' });
-    }
-
-    const transaksi = await Transaksi.findAll({
+    let queryOptions = {
       attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total'],
       include: [
         { model: Users, attributes: ['name'] },
         { model: Item, attributes: ['name', 'price'] },
       ],
-      where: {
+    };
+
+    if (searchQuery) {
+      queryOptions.where = {
         [Op.or]: [
           { '$User.name$': { [Op.like]: `%${searchQuery}%` } },
           { noHp: { [Op.like]: `%${searchQuery}%` } },
           { '$Product.name$': { [Op.like]: `%${searchQuery}%` } },
         ],
-      },
-    });
+      };
+    }
+
+    const transaksi = await Transaksi.findAll(queryOptions);
 
     res.json(transaksi);
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ msg: 'Internal server error' });
+    console.log(error);
+    res.status(500).json({ msg: 'Terjadi kesalahan server' });
   }
 };
 

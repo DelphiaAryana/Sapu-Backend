@@ -1,8 +1,9 @@
+/* eslint-disable import/extensions */
 /* eslint-disable camelcase */
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
-import Users from '../models/UserModel';
+import Users from '../models/UserModel.js';
 
 export const getUsers = async (req, res) => {
   try {

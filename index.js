@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import session from 'express-session';
-import SequelizeStore from 'connect-session-sequelize';
 import FileUpload from 'express-fileupload';
 import db from './config/database.js';
 import router from './routes/index.js';
@@ -14,12 +13,6 @@ import TransaksiRoute from './routes/TransaksiRoute.js';
 
 dotenv.config();
 const app = express();
-
-const sessionStore = SequelizeStore(session.Store);
-
-const store = new sessionStore({
-  db,
-});
 
 try {
   await db.authenticate();
@@ -33,7 +26,6 @@ app.use(session({
   secret: process.env.SESS_SECRET,
   resave: false,
   saveUninitialized: true,
-  store,
   cookie: {
     secure: 'auto',
   },
@@ -47,7 +39,5 @@ app.use(express.static('public'));
 app.use(router);
 app.use(ItemRoute);
 app.use(TransaksiRoute);
-
-store.sync();
 
 app.listen(process.env.APP_URL, () => console.log('Server running at port 4000'));

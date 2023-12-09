@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
-const db = new Sequelize('bvniir6pdqklxplzmaek', 'umdxy9l7f5gtksiw', 'QICBanY6rOlCtsAx2rjb', {
-  host: 'bvniir6pdqklxplzmaek-mysql.services.clever-cloud.com',
+const db = new Sequelize('bzzt4lortqptla9xotfm', 'umdjjxf57nugao03', '9BhhUjjHMXHNtietC1yO', {
+  host: 'bzzt4lortqptla9xotfm-mysql.services.clever-cloud.com',
   dialect: 'mysql',
 });
 export default db;

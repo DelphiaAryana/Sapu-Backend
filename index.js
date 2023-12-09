@@ -4,7 +4,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-// import session from 'express-session';
 import FileUpload from 'express-fileupload';
 import db from './config/database.js';
 import router from './routes/index.js';
@@ -22,16 +21,7 @@ try {
   console.error(error);
 }
 
-// app.use(session({
-//   secret: process.env.SESS_SECRET,
-//   resave: false,
-//   saveUninitialized: true,
-//   cookie: {
-//     secure: 'auto',
-//   },
-// }));
-
-app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5173' }));
+app.use(cors({ credentials: true, origin: 'https://sapu-akhmad-sugiannooors-projects.vercel.app' }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(FileUpload());

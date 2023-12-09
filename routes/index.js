@@ -1,8 +1,8 @@
+/* eslint-disable object-curly-newline */
+/* eslint-disable quotes */
 import express from "express";
-
-import { getUsers, getUserById, updateUser, deleteUser, Register, Login, Logout } from "../controllers/Users.js";
-import { verify_Token } from "../middleware/VerifyToken.js";
-import { refreshToken } from "../controllers/RefreshToken.js";
+import { getUsers, getUserById, updateUser, deleteUser, Register, Login, Logout } from "../controllers/Users";
+import { refreshToken } from "../controllers/RefreshToken";
 
 const router = express.Router();
 

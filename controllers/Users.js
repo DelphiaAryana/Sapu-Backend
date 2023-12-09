@@ -1,12 +1,12 @@
-import argon2 from 'argon2';
+/* eslint-disable camelcase */
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Users from '../models/UserModel.js';
 import { Op } from 'sequelize';
+import Users from '../models/UserModel';
 
 export const getUsers = async (req, res) => {
   try {
-    let queryOptions = {
+    const queryOptions = {
       attributes: ['id', 'uuid', 'name', 'email', 'username', 'role', 'balance'],
     };
 
@@ -30,7 +30,7 @@ export const getUsers = async (req, res) => {
   }
 };
 
-
+// eslint-disable-next-line consistent-return
 export const getUserById = async (req, res) => {
   try {
     const users = await Users.findOne({
@@ -39,7 +39,7 @@ export const getUserById = async (req, res) => {
       },
     });
     if (!users) {
-        return res.status(404).json({ msg: "User tidak ditemukan" });
+      return res.status(404).json({ msg: 'User tidak ditemukan' });
     }
     res.status(200).json(users);
   } catch (error) {
@@ -48,62 +48,64 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 export const updateUser = async (req, res) => {
-    const userId = req.params.id;
-    const { name, username, email} = req.body;
+  const userId = req.params.id;
+  const { name, username, email } = req.body;
 
-    try {
-        const isEmailTaken = await Users.findOne({
-            where: {
-                email: email,
-                id: { [Op.not]: userId }
-            }
-        });
+  try {
+    const isEmailTaken = await Users.findOne({
+      where: {
+        email,
+        id: { [Op.not]: userId },
+      },
+    });
 
-        if (isEmailTaken) {
-            return res.status(400).json({ msg: "Email sudah digunakan" });
-        }
-
-        const existingUser = await Users.findByPk(userId);
-
-        if (!existingUser) {
-            return res.status(404).json({ msg: "User tidak ditemukan" });
-        }
-
-        existingUser.name = name;
-        existingUser.username = username;
-        existingUser.email = email;
-
-        await existingUser.save();
-
-        res.status(200).json({ msg: "User berhasil diupdate" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: "Terjadi kesalahan server" });
+    if (isEmailTaken) {
+      return res.status(400).json({ msg: 'Email sudah digunakan' });
     }
+
+    const existingUser = await Users.findByPk(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({ msg: 'User tidak ditemukan' });
+    }
+
+    existingUser.name = name;
+    existingUser.username = username;
+    existingUser.email = email;
+
+    await existingUser.save();
+
+    res.status(200).json({ msg: 'User berhasil diupdate' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: 'Terjadi kesalahan server' });
+  }
 };
 
+// eslint-disable-next-line consistent-return
 export const deleteUser = async (req, res) => {
   const user = await Users.findOne({
     where: {
       id: req.params.id,
     },
   });
-  
+
   if (!user) {
     return res.status(404).json({ msg: 'User tidak ditemukan' });
   }
-  
+
   await Users.destroy({
     where: {
       id: req.params.id,
     },
   });
-  
+
   res.status(200).json({ msg: 'User berhasil dihapus' });
-  
 };
 
+// eslint-disable-next-line consistent-return
 export const Register = async (req, res) => {
   const {
     name, username, email, password, confPassword,
@@ -139,6 +141,7 @@ export const Register = async (req, res) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 export const Login = async (req, res) => {
   try {
     if (!req.body.email) {
@@ -157,14 +160,14 @@ export const Login = async (req, res) => {
     const { name } = user[0];
     const { email } = user[0];
     const { balance } = user[0];
-    const {role} = user[0];
+    const { role } = user[0];
     const access_token = jwt.sign({
       userId, name, email, balance, role,
     }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '60s',
     });
     const refreshToken = jwt.sign({
-      userId, name, email, balance, role
+      userId, name, email, balance, role,
     }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '1d',
     });

@@ -1,14 +1,15 @@
+/* eslint-disable new-cap */
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import session from "express-session";
-import SequelizeStore  from "connect-session-sequelize";
-import db from './config/database.js';
-import router from './routes/index.js';
-import FileUpload from "express-fileupload";
-import ItemRoute from "./routes/ItemRoute.js";
-import TransaksiRoute from "./routes/TransaksiRoute.js";
+import session from 'express-session';
+import SequelizeStore from 'connect-session-sequelize';
+import FileUpload from 'express-fileupload';
+import db from './config/database';
+import router from './routes/index';
+import ItemRoute from './routes/ItemRoute';
+import TransaksiRoute from './routes/TransaksiRoute';
 
 dotenv.config();
 const app = express();
@@ -16,8 +17,8 @@ const app = express();
 const sessionStore = SequelizeStore(session.Store);
 
 const store = new sessionStore({
-  db: db
-})
+  db,
+});
 
 try {
   await db.authenticate();
@@ -31,17 +32,17 @@ app.use(session({
   secret: process.env.SESS_SECRET,
   resave: false,
   saveUninitialized: true,
-  store: store,
+  store,
   cookie: {
-    secure: 'auto'
-  }
-}))
+    secure: 'auto',
+  },
+}));
 
 app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5173' }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(FileUpload());
-app.use(express.static("public"));
+app.use(express.static('public'));
 app.use(router);
 app.use(ItemRoute);
 app.use(TransaksiRoute);

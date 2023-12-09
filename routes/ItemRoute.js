@@ -1,11 +1,12 @@
-import express from "express";
+/* eslint-disable indent */
+import express from 'express';
 import {
     getItems,
     getItemById,
     saveItem,
     updateItem,
-    deleteItem
-} from "../controllers/ItemController.js";
+    deleteItem,
+} from '../controllers/ItemController';
 
 const router = express.Router();
 

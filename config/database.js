@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const db = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
+const db = new Sequelize('sapu_db', 'root', '', {
   host: process.env.DB_HOST,
   dialect: 'mysql',
 });

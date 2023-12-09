@@ -23,7 +23,7 @@ const Transaksi = db.define('transaksi', {
     noHp: DataTypes.STRING,
     quantity: DataTypes.INTEGER,
     address: DataTypes.STRING,
-    date: DataTypes.DATE,
+    date: DataTypes.STRING,
     total: DataTypes.INTEGER,
 }, {
     freezeTableName: true

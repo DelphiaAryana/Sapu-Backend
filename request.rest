@@ -1,8 +1,5 @@
 GET http://localhost:4000/users
 
-###
-GET http://localhost:4000/me
-
 # Mendapatkan user berdasarkan id
 ###
 GET http://localhost:4000/users/3

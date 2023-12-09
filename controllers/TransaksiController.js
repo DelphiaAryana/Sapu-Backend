@@ -5,13 +5,25 @@ import { Op } from 'sequelize';
 
 export const getTransaksi = async (req, res) => {
   try {
+    const transaksi = await Transaksi.findAll({
+      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total']
+    });
+    res.json(transaksi);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: 'Terjadi kesalahan server' });
+  }
+};
+
+export const getTableTransaksi = async (req, res) => {
+  try {
     const searchQuery = req.query.search;
 
     let queryOptions = {
-      attributes: ['id', 'id_user', 'id_item', 'noHp', 'quantity', 'address', 'total'],
+      attributes: ['id', 'noHp', 'quantity', 'address', 'date', 'total'],
       include: [
         { model: Users, attributes: ['name'] },
-        { model: Item, attributes: ['name', 'price'] },
+        { model: Item, attributes: ['name', 'price'] } 
       ],
     };
 
@@ -26,23 +38,6 @@ export const getTransaksi = async (req, res) => {
     }
 
     const transaksi = await Transaksi.findAll(queryOptions);
-
-    res.json(transaksi);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ msg: 'Terjadi kesalahan server' });
-  }
-};
-
-export const getTableTransaksi = async (req, res) => {
-  try {
-    const transaksi = await Transaksi.findAll({
-      attributes: ['id', 'noHp', 'quantity', 'address', 'date', 'total'],
-      include: [
-        { model: Users, attributes: ['name'] },
-        { model: Item, attributes: ['name', 'price'] } 
-      ],
-    });
     res.json(transaksi);
   } catch (error) {
     console.log(error);

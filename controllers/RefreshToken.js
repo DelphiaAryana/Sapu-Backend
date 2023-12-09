@@ -1,6 +1,7 @@
+/* eslint-disable import/extensions */
 /* eslint-disable import/prefer-default-export */
 import jwt from 'jsonwebtoken';
-import Users from '../models/UserModel';
+import Users from '../models/UserModel.js';
 
 // eslint-disable-next-line consistent-return
 export const refreshToken = async (req, res) => {

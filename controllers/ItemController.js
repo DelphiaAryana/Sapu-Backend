@@ -1,8 +1,9 @@
+/* eslint-disable import/extensions */
 /* eslint-disable consistent-return */
 import fs from 'fs';
 import path from 'path';
 import { Op } from 'sequelize';
-import Item from '../models/ItemModel';
+import Item from '../models/ItemModel.js';
 
 export const getItems = async (req, res) => {
   try {

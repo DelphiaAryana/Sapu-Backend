@@ -1,5 +1,6 @@
+/* eslint-disable import/extensions */
 import { Sequelize } from 'sequelize';
-import db from '../config/database';
+import db from '../config/database.js';
 
 const { DataTypes } = Sequelize;
 

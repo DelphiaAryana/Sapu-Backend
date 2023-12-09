@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 /* eslint-disable indent */
 import express from 'express';
 import {
@@ -6,7 +7,7 @@ import {
     saveItem,
     updateItem,
     deleteItem,
-} from '../controllers/ItemController';
+} from '../controllers/ItemController.js';
 
 const router = express.Router();
 

@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 /* eslint-disable new-cap */
 import express from 'express';
 import dotenv from 'dotenv';
@@ -6,10 +7,10 @@ import cors from 'cors';
 import session from 'express-session';
 import SequelizeStore from 'connect-session-sequelize';
 import FileUpload from 'express-fileupload';
-import db from './config/database';
-import router from './routes/index';
-import ItemRoute from './routes/ItemRoute';
-import TransaksiRoute from './routes/TransaksiRoute';
+import db from './config/database.js';
+import router from './routes/index.js';
+import ItemRoute from './routes/ItemRoute.js';
+import TransaksiRoute from './routes/TransaksiRoute.js';
 
 dotenv.config();
 const app = express();

@@ -1,6 +1,7 @@
+/* eslint-disable import/extensions */
 /* eslint-disable no-dupe-keys */
 import { Sequelize } from 'sequelize';
-import db from '../config/database';
+import db from '../config/database.js';
 
 const { DataTypes } = Sequelize;
 

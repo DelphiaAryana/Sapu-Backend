@@ -1,10 +1,11 @@
+/* eslint-disable import/extensions */
 /* eslint-disable camelcase */
 /* eslint-disable consistent-return */
 /* eslint-disable prefer-const */
 import { Op } from 'sequelize';
-import Transaksi from '../models/TransaksiModel';
-import Users from '../models/UserModel';
-import Item from '../models/ItemModel';
+import Transaksi from '../models/TransaksiModel.js';
+import Users from '../models/UserModel.js';
+import Item from '../models/ItemModel.js';
 
 export const getTransaksi = async (req, res) => {
   try {

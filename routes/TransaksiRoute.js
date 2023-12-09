@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 import express from 'express';
 import {
   getTransaksi,
@@ -6,7 +7,7 @@ import {
   createTransaksi,
   updateBalance,
   deleteTransaksi,
-} from '../controllers/TransaksiController';
+} from '../controllers/TransaksiController.js';
 
 const router = express.Router();
 

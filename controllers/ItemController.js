@@ -43,34 +43,44 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = (req, res) => {
-  if (req.files === null) return res.status(400).json({ msg: 'No file Uploaded' });
+  if (req.files === null) return res.status(400).json({ msg: 'Tidak ada berkas yang diunggah' });
+
   const name = req.body.title;
   const { file } = req.files;
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
+
+  if (!fs.existsSync('./public/images')) {
+    fs.mkdirSync('./public/images', { recursive: true });
+  }
+
   const url = `${req.protocol}://${req.get('host')}/images/${fileName}`;
   const { description } = req.body;
   const { price } = req.body;
   const allowedType = ['.png', '.jpg', '.jpeg'];
 
   if (!allowedType.includes(ext.toLowerCase())) {
-    return res.status(422).json({
-      msg:
-        'Invalid Images',
-    });
+    return res.status(422).json({ msg: 'Gambar tidak valid' });
   }
-  if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+
+  if (fileSize > 5000000) {
+    return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
+  }
 
   file.mv(`./public/images/${fileName}`, async (err) => {
-    if (err) return res.status(500).json({ msg: err.message });
+    if (err) {
+      return res.status(500).json({ msg: err.message });
+    }
+
     try {
       await Item.create({
         name, image: fileName, url, description, price,
       });
-      res.status(201).json({ msg: 'Item Created Successfuly' });
+      res.status(201).json({ msg: 'Item berhasil dibuat' });
     } catch (error) {
       console.log(error.message);
+      res.status(500).json({ msg: 'Terjadi kesalahan saat membuat item' });
     }
   });
 };

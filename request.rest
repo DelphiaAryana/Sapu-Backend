@@ -27,9 +27,9 @@ POST http://localhost:4000/users
 Content-Type: application/json
 
 {
-    "name": "alip",
-    "username": "pipi",
-    "email": "pipi@gmail.com",
+    "name": "M Gymnastiar",
+    "username": "Agim",
+    "email": "agim@gmail.com",
     "password": "123322",
     "confPassword": "123322"
 }
@@ -39,7 +39,7 @@ POST http://localhost:4000/login
 Content-Type: application/json
 
 {
-    "email": "pipi@gmail.com",
+    "email": "agim@gmail.com",
     "password": "123322"
 }
 

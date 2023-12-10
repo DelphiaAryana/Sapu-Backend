@@ -49,7 +49,7 @@ export const saveItem = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
-  const url = `https://sapu-akhmad-sugiannooors-projects.vercel.app/images/${fileName}`;
+  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
   const { description } = req.body;
   const { price } = req.body;
   const allowedType = ['.png', '.jpg', '.jpeg'];
@@ -105,7 +105,7 @@ export const updateItem = async (req, res) => {
     });
   }
   const name = req.body.title;
-  const url = `https://sapu-akhmad-sugiannooors-projects.vercel.app/images/${fileName}`;
+  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
   const { description } = req.body;
   const { price } = req.body;
 

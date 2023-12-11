@@ -63,13 +63,13 @@ export const saveItem = async (req, res) => {
       return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
     }
 
-    const imagesDirectory = './public/images';
+    const imagesDirectory = path.join(__dirname, 'public', 'images');
 
     if (!fs.existsSync(imagesDirectory)) {
       fs.mkdirSync(imagesDirectory, { recursive: true });
     }
 
-    await file.mv(`${imagesDirectory}/${fileName}`);
+    await file.mv(path.join(imagesDirectory, fileName));
 
     const { title, description, price } = req.body;
 

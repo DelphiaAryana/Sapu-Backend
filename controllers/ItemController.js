@@ -44,14 +44,18 @@ export const getItemById = async (req, res) => {
 
 export const saveItem = async (req, res) => {
   try {
-    if (req.files === null) return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
+    }
 
     const { file } = req.files;
     const ext = path.extname(file.name);
     const fileName = file.md5 + ext;
 
     const fileSize = file.data.length;
-    if (!['.png', '.jpg', '.jpeg'].includes(ext.toLowerCase())) {
+    const allowedTypes = ['.png', '.jpg', '.jpeg'];
+
+    if (!allowedTypes.includes(ext.toLowerCase())) {
       return res.status(422).json({ msg: 'Format gambar tidak valid' });
     }
 
@@ -80,7 +84,7 @@ export const saveItem = async (req, res) => {
     res.status(201).json({ msg: 'Item berhasil dibuat' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: 'Kesalahan Internal Server' });
+    res.status(500).json({ msg: `Kesalahan Internal Server: ${error.message}` });
   }
 };
 

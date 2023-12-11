@@ -42,7 +42,7 @@ export const getItemById = async (req, res) => {
   }
 };
 
-export const saveItem = async (req, res) => {
+export const saveItem = (req, res) => {
   if (req.files === null) return res.status(400).json({ msg: 'No file Uploaded' });
   const name = req.body.title;
   const { file } = req.files;
@@ -56,20 +56,23 @@ export const saveItem = async (req, res) => {
 
   if (!allowedType.includes(ext.toLowerCase())) {
     return res.status(422).json({
-      msg: 'Invalid Images',
+      msg:
+        'Invalid Images',
     });
   }
   if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
 
-  try {
-    await Item.create({
-      name, image: fileName, url, description, price,
-    });
-    res.status(201).json({ msg: 'Item Created Successfully' });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ msg: 'Internal Server Error' });
-  }
+  file.mv(`./images/${fileName}`, async (err) => {
+    if (err) return res.status(500).json({ msg: err.message });
+    try {
+      await Item.create({
+        name, image: fileName, url, description, price,
+      });
+      res.status(201).json({ msg: 'Item Created Successfuly' });
+    } catch (error) {
+      console.log(error.message);
+    }
+  });
 };
 
 export const updateItem = async (req, res) => {

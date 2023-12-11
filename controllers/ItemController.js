@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Op } from 'sequelize';
+import { fileURLToPath } from 'url'; // Import fileURLToPath
 import Item from '../models/ItemModel.js';
 
 export const getItems = async (req, res) => {
@@ -41,6 +42,9 @@ export const getItemById = async (req, res) => {
     console.log(error.message);
   }
 };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const saveItem = async (req, res) => {
   try {

@@ -153,9 +153,9 @@ export const deleteItem = async (req, res) => {
   }
 };
 
-export const getImage = (req, res) => {
-  const { fileName } = req.params;
-  const imageUrl = `https://sapu-backend-mu.vercel.app/public/images/${fileName}`;
+// export const getImage = (req, res) => {
+//   const { fileName } = req.params;
+//   const imageUrl = `https://sapu-backend-mu.vercel.app/public/images/${fileName}`;
 
-  res.json({ imageUrl });
-};
+//   res.json({ imageUrl });
+// };

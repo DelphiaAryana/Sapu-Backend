@@ -42,43 +42,46 @@ export const getItemById = async (req, res) => {
   }
 };
 
-export const saveItem = (req, res) => {
-  if (req.files === null) return res.status(400).json({ msg: 'No file Uploaded' });
-  const name = req.body.title;
-  const { file } = req.files;
-  const fileSize = file.data.length;
-  const ext = path.extname(file.name);
-  const fileName = file.md5 + ext;
-  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
-  const { description } = req.body;
-  const { price } = req.body;
-  const allowedType = ['.png', '.jpg', '.jpeg'];
+export const saveItem = async (req, res) => {
+  try {
+    if (req.files === null) return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
 
-  if (!allowedType.includes(ext.toLowerCase())) {
-    return res.status(422).json({
-      msg:
-        'Invalid Images',
-    });
-  }
-  if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+    const { file } = req.files;
+    const ext = path.extname(file.name);
+    const fileName = file.md5 + ext;
 
-  const imagesDirectory = './public/images';
-
-  if (!fs.existsSync(imagesDirectory)) {
-    fs.mkdirSync(imagesDirectory, { recursive: true });
-  }
-
-  file.mv(`${imagesDirectory}/${fileName}`, async (err) => {
-    if (err) return res.status(500).json({ msg: err.message });
-    try {
-      await Item.create({
-        name, image: fileName, url, description, price,
-      });
-      res.status(201).json({ msg: 'Item Created Successfuly' });
-    } catch (error) {
-      console.log(error.message);
+    const fileSize = file.data.length;
+    if (!['.png', '.jpg', '.jpeg'].includes(ext.toLowerCase())) {
+      return res.status(422).json({ msg: 'Format gambar tidak valid' });
     }
-  });
+
+    if (fileSize > 5000000) {
+      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
+    }
+
+    const imagesDirectory = './public/images';
+
+    if (!fs.existsSync(imagesDirectory)) {
+      fs.mkdirSync(imagesDirectory, { recursive: true });
+    }
+
+    await file.mv(`${imagesDirectory}/${fileName}`);
+
+    const { title, description, price } = req.body;
+
+    await Item.create({
+      name: title,
+      image: fileName,
+      url: `https://sapu-backend-mu.vercel.app/images/${fileName}`,
+      description,
+      price,
+    });
+
+    res.status(201).json({ msg: 'Item berhasil dibuat' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Kesalahan Internal Server' });
+  }
 };
 
 export const updateItem = async (req, res) => {

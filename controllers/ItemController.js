@@ -3,7 +3,6 @@
 import fs from 'fs';
 import path from 'path';
 import { Op } from 'sequelize';
-import { fileURLToPath } from 'url'; // Import fileURLToPath
 import Item from '../models/ItemModel.js';
 
 export const getItems = async (req, res) => {
@@ -43,55 +42,53 @@ export const getItemById = async (req, res) => {
   }
 };
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export const saveItem = (req, res) => {
+  const allowedTypes = ['.png', '.jpg', '.jpeg'];
 
-export const saveItem = async (req, res) => {
-  try {
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
-    }
-
-    const { file } = req.files;
-    const ext = path.extname(file.name);
-    const fileName = file.md5 + ext;
-
-    const fileSize = file.data.length;
-    const allowedTypes = ['.png', '.jpg', '.jpeg'];
-
-    if (!allowedTypes.includes(ext.toLowerCase())) {
-      return res.status(422).json({ msg: 'Format gambar tidak valid' });
-    }
-
-    if (fileSize > 5000000) {
-      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
-    }
-
-    const imagesDirectory = path.join(__dirname, 'public', 'images');
-
-    if (!fs.existsSync(imagesDirectory)) {
-      fs.mkdirSync(imagesDirectory, { recursive: true });
-    }
-
-    await file.mv(path.join(imagesDirectory, fileName));
-
-    const { title, description, price } = req.body;
-
-    await Item.create({
-      name: title,
-      image: fileName,
-      url: `https://sapu-backend-mu.vercel.app/images/${fileName}`,
-      description,
-      price,
-    });
-
-    res.status(201).json({ msg: 'Item berhasil dibuat' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: `Kesalahan Internal Server: ${error.message}` });
+  // Pastikan req.files telah di-handle oleh middleware seperti multer
+  if (!req.files || req.files.file === null) {
+    return res.status(400).json({ msg: 'No file uploaded' });
   }
-};
 
+  const { file } = req.files;
+  const ext = path.extname(file.name);
+  const fileName = file.md5 + ext;
+
+  if (!allowedTypes.includes(ext.toLowerCase())) {
+    return res.status(422).json({ msg: 'Invalid image type' });
+  }
+
+  const fileSize = file.size;
+  if (fileSize > 5000000) {
+    return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+  }
+
+  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
+  const { title, description, price } = req.body;
+
+  const destinationPath = path.join(__dirname, './public/images', fileName);
+
+  file.mv(destinationPath, async (err) => {
+    if (err) {
+      return res.status(500).json({ msg: err.message });
+    }
+
+    try {
+      await Item.create({
+        name: title,
+        image: fileName,
+        url,
+        description,
+        price,
+      });
+
+      return res.status(201).json({ msg: 'Item created successfully' });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ msg: 'Internal Server Error' });
+    }
+  });
+};
 export const updateItem = async (req, res) => {
   const item = await Item.findOne({
     where: {

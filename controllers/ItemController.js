@@ -62,7 +62,13 @@ export const saveItem = (req, res) => {
   }
   if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
 
-  file.mv(`./public/images/${fileName}`, async (err) => {
+  const imagesDirectory = './public/images';
+
+  if (!fs.existsSync(imagesDirectory)) {
+    fs.mkdirSync(imagesDirectory, { recursive: true });
+  }
+
+  file.mv(`${imagesDirectory}/${fileName}`, async (err) => {
     if (err) return res.status(500).json({ msg: err.message });
     try {
       await Item.create({

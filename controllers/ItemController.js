@@ -1,3 +1,5 @@
+/* eslint-disable import/no-import-module-exports */
+/* eslint-disable camelcase */
 /* eslint-disable import/extensions */
 /* eslint-disable consistent-return */
 import fs from 'fs';
@@ -5,6 +7,7 @@ import path from 'path';
 import { Op } from 'sequelize';
 import cloudinary from '../config/cloudinary.js';
 import Item from '../models/ItemModel.js';
+// import upload from '../middleware/multer.js';
 
 export const getItems = async (req, res) => {
   try {
@@ -44,46 +47,39 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
-  if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
-
-  const name = req.body.title;
-  const { file } = req.files;
-  const fileSize = file.data.length;
-  const ext = path.extname(file.name);
-  const fileName = file.md5 + ext;
-
-  const allowedType = ['.png', '.jpg', '.jpeg'];
-
-  if (!allowedType.includes(ext.toLowerCase())) {
-    return res.status(422).json({
-      msg: 'Invalid image format',
-    });
-  }
-
-  if (fileSize > 5000000) {
-    return res.status(422).json({ msg: 'Image must be less than 5 MB' });
-  }
-
   try {
-    const cloudinaryResponse = await cloudinary.v2.uploader.upload(`./public/images/${fileName}`, {
-      public_id: `images/${fileName}`,
+    if (!req.file) return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
+
+    const { title, description, price } = req.body;
+    const { file } = req;
+    const ext = path.extname(file.originalname);
+    const allowedTypes = ['.png', '.jpg', '.jpeg'];
+
+    if (!allowedTypes.includes(ext.toLowerCase())) {
+      return res.status(422).json({ msg: 'Tipe gambar tidak valid' });
+    }
+
+    if (file.size > 5000000) {
+      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
+    }
+
+    cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
+      const { secure_url } = cloudinaryResult;
+
+      // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
+      await Item.create({
+        name: title,
+        image: secure_url,
+        url: secure_url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
+        description,
+        price,
+      });
+
+      res.status(201).json({ msg: 'Item berhasil dibuat' });
     });
-
-    const url = cloudinaryResponse.secure_url;
-    const { description, price } = req.body;
-
-    await Item.create({
-      name,
-      image: fileName,
-      url,
-      description,
-      price,
-    });
-
-    res.status(201).json({ msg: 'Item created successfully' });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: 'Internal Server Error' });
+    res.status(500).json({ msg: 'Kesalahan Server Internal' });
   }
 };
 

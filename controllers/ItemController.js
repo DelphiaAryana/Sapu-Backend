@@ -61,23 +61,25 @@ export const saveItem = async (req, res) => {
 
   try {
     const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: 'images', // You can customize the folder where the image will be stored in Cloudinary
+      folder: 'images', // Anda dapat menyesuaikan folder tempat gambar akan disimpan di Cloudinary
     });
 
     const { title, description, price } = req.body;
 
-    // Now you can use the cloudinaryResult to save the data in your database
+    // Sekarang Anda dapat menggunakan cloudinaryResult untuk menyimpan data dalam database
     await Item.create({
       name: title,
-      image: cloudinaryResult.public_id,
-      url: cloudinaryResult.secure_url,
+      image: {
+        public_id: cloudinaryResult.public_id,
+        url: cloudinaryResult.secure_url,
+      },
       description,
       price,
     });
 
     res.status(201).json({ msg: 'Item created successfully' });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({ msg: 'Internal Server Error' });
   }
 };

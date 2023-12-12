@@ -7,7 +7,7 @@ import path from 'path';
 import { Op } from 'sequelize';
 import cloudinary from '../config/cloudinary.js';
 import Item from '../models/ItemModel.js';
-// import upload from '../middleware/multer.js';
+import upload from '../middleware/multer.js';
 
 export const getItems = async (req, res) => {
   try {
@@ -59,23 +59,27 @@ export const saveItem = async (req, res) => {
       return res.status(422).json({ msg: 'Tipe gambar tidak valid' });
     }
 
-    if (file.size > 5000000) {
-      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
-    }
+    // Gunakan middleware upload untuk mengunggah file
+    upload(req, res, async (uploadError) => {
+      if (uploadError) {
+        console.error(uploadError);
+        return res.status(500).json({ msg: 'Kesalahan Server Internal' });
+      }
 
-    cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
-      const { secure_url } = cloudinaryResult;
+      cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
+        const { secure_url } = cloudinaryResult;
 
-      // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-      await Item.create({
-        name: title,
-        image: secure_url,
-        url: secure_url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
-        description,
-        price,
+        // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
+        await Item.create({
+          name: title,
+          image: secure_url,
+          url: secure_url,
+          description,
+          price,
+        });
+
+        res.status(201).json({ msg: 'Item berhasil dibuat' });
       });
-
-      res.status(201).json({ msg: 'Item berhasil dibuat' });
     });
   } catch (error) {
     console.error(error.message);

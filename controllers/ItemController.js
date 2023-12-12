@@ -47,44 +47,52 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
-
-    const { title, description, price } = req.body;
-    const { file } = req;
-    const ext = path.extname(file.originalname);
-    const allowedTypes = ['.png', '.jpg', '.jpeg'];
-
-    if (!allowedTypes.includes(ext.toLowerCase())) {
-      return res.status(422).json({ msg: 'Tipe gambar tidak valid' });
+  // Gunakan middleware multer untuk menangani unggah file
+  upload.single('file')(req, res, async (err) => {
+    if (err) {
+      return res.status(500).json({ msg: 'Error mengunggah file' });
     }
 
-    // Gunakan middleware upload untuk mengunggah file
-    upload(req, res, async (uploadError) => {
-      if (uploadError) {
-        console.error(uploadError);
-        return res.status(500).json({ msg: 'Kesalahan Server Internal' });
+    try {
+      const { title, description, price } = req.body;
+      const { file } = req;
+      const ext = path.extname(file.originalname);
+      const allowedTypes = ['.png', '.jpg', '.jpeg'];
+
+      if (!allowedTypes.includes(ext.toLowerCase())) {
+        return res.status(422).json({ msg: 'Tipe gambar tidak valid' });
+      }
+
+      if (file.size > 5000000) {
+        return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
       }
 
       cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
         const { secure_url } = cloudinaryResult;
 
+        try {
         // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-        await Item.create({
-          name: title,
-          image: secure_url,
-          url: secure_url,
-          description,
-          price,
-        });
+          const newItem = await Item.create({
+            name: title,
+            image: secure_url,
+            url: secure_url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
+            description,
+            price,
+          });
 
-        res.status(201).json({ msg: 'Item berhasil dibuat' });
+          // Beri respons dengan data item yang baru saja dibuat
+          res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem });
+        } catch (databaseError) {
+        // Tangani kesalahan basis data, misalnya, duplikasi kunci unik
+          console.error(databaseError.message);
+          res.status(500).json({ msg: 'Kesalahan Server Internal saat menyimpan item' });
+        }
       });
-    });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: 'Kesalahan Server Internal' });
-  }
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ msg: 'Kesalahan Server Internal' });
+    }
+  });
 };
 
 export const updateItem = async (req, res) => {

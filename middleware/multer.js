@@ -3,10 +3,13 @@ import multer from 'multer';
 
 const storage = multer.diskStorage({
   filename(req, file, cb) {
-    cb(null, file.originalname);
+    // Lakukan sesuatu dengan req jika diperlukan
+    // Misalnya, menggabungkan nama file dengan ID pengguna
+    const newFileName = `${req.user.id}_${file.originalname}`;
+    cb(null, newFileName);
   },
 });
 
 const upload = multer({ storage });
 
-export default upload;
+module.exports = upload;

@@ -8,14 +8,13 @@ const Item = db.define('product', {
   name: DataTypes.STRING,
   image: {
     public_id: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     url: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-
   },
   description: DataTypes.STRING,
   price: DataTypes.INTEGER,

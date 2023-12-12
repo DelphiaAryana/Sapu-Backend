@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-import-module-exports
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({

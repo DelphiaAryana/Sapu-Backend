@@ -44,43 +44,46 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
+  if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
+
+  const name = req.body.title;
+  const { file } = req.files;
+  const fileSize = file.data.length;
+  const ext = path.extname(file.name);
+  const fileName = file.md5 + ext;
+
+  const allowedType = ['.png', '.jpg', '.jpeg'];
+
+  if (!allowedType.includes(ext.toLowerCase())) {
+    return res.status(422).json({
+      msg: 'Invalid image format',
+    });
+  }
+
+  if (fileSize > 5000000) {
+    return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+  }
+
   try {
-    if (!req.files || Object.keys(req.files).length === 0) {
-      return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
-    }
-
-    const { file } = req.files;
-    const fileSize = file.data.length;
-    const ext = path.extname(file.name);
-    const allowedType = ['.png', '.jpg', '.jpeg'];
-
-    if (!allowedType.includes(ext.toLowerCase())) {
-      return res.status(422).json({ msg: 'Format gambar tidak valid' });
-    }
-
-    if (fileSize > 5000000) {
-      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
-    }
-
-    const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: 'images', // Hapus path lokal dari parameter folder
+    const cloudinaryResponse = await cloudinary.v2.uploader.upload(`./public/images/${fileName}`, {
+      public_id: `images/${fileName}`,
     });
 
-    const { title, description, price } = req.body;
+    const url = cloudinaryResponse.secure_url;
+    const { description, price } = req.body;
+
     await Item.create({
-      name: title,
-      image: {
-        public_id: cloudinaryResult.public_id,
-        url: cloudinaryResult.secure_url,
-      },
+      name,
+      image: fileName,
+      url,
       description,
       price,
     });
 
-    res.status(201).json({ msg: 'Item berhasil dibuat' });
+    res.status(201).json({ msg: 'Item created successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: 'Kesalahan Server Internal' });
+    console.error(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 

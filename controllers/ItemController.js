@@ -61,12 +61,10 @@ export const saveItem = async (req, res) => {
 
   try {
     const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: 'images', // Anda dapat menyesuaikan folder tempat gambar akan disimpan di Cloudinary
+      folder: 'images',
     });
 
     const { title, description, price } = req.body;
-
-    // Sekarang Anda dapat menggunakan cloudinaryResult untuk menyimpan data dalam database
     await Item.create({
       name: title,
       image: {

@@ -45,8 +45,8 @@ export const getItemById = async (req, res) => {
 
 export const saveItem = async (req, res) => {
   try {
-    if (req.files === null) {
-      return res.status(400).json({ msg: 'No file uploaded' });
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ msg: 'Tidak ada file yang diunggah' });
     }
 
     const { file } = req.files;
@@ -55,15 +55,15 @@ export const saveItem = async (req, res) => {
     const allowedType = ['.png', '.jpg', '.jpeg'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
-      return res.status(422).json({ msg: 'Invalid image format' });
+      return res.status(422).json({ msg: 'Format gambar tidak valid' });
     }
 
     if (fileSize > 5000000) {
-      return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+      return res.status(422).json({ msg: 'Gambar harus kurang dari 5 MB' });
     }
 
     const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
-      folder: 'images',
+      folder: 'images', // Hapus path lokal dari parameter folder
     });
 
     const { title, description, price } = req.body;
@@ -77,10 +77,10 @@ export const saveItem = async (req, res) => {
       price,
     });
 
-    res.status(201).json({ msg: 'Item created successfully' });
+    res.status(201).json({ msg: 'Item berhasil dibuat' });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: 'Internal Server Error' });
+    console.error(error);
+    res.status(500).json({ msg: 'Kesalahan Server Internal' });
   }
 };
 

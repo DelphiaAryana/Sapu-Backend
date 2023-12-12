@@ -44,22 +44,24 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
-  if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
-
-  const { file } = req.files;
-  const fileSize = file.data.length;
-  const ext = path.extname(file.name);
-  const allowedType = ['.png', '.jpg', '.jpeg'];
-
-  if (!allowedType.includes(ext.toLowerCase())) {
-    return res.status(422).json({ msg: 'Invalid image format' });
-  }
-
-  if (fileSize > 5000000) {
-    return res.status(422).json({ msg: 'Image must be less than 5 MB' });
-  }
-
   try {
+    if (req.files === null) {
+      return res.status(400).json({ msg: 'No file uploaded' });
+    }
+
+    const { file } = req.files;
+    const fileSize = file.data.length;
+    const ext = path.extname(file.name);
+    const allowedType = ['.png', '.jpg', '.jpeg'];
+
+    if (!allowedType.includes(ext.toLowerCase())) {
+      return res.status(422).json({ msg: 'Invalid image format' });
+    }
+
+    if (fileSize > 5000000) {
+      return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+    }
+
     const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
       folder: 'images',
     });

@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Op } from 'sequelize';
+import cloudinary from '../config/cloudinary.js';
 import Item from '../models/ItemModel.js';
 
 export const getItems = async (req, res) => {
@@ -42,53 +43,45 @@ export const getItemById = async (req, res) => {
   }
 };
 
-export const saveItem = (req, res) => {
-  const allowedTypes = ['.png', '.jpg', '.jpeg'];
-
-  // Pastikan req.files telah di-handle oleh middleware seperti multer
-  if (!req.files || req.files.file === null) {
-    return res.status(400).json({ msg: 'No file uploaded' });
-  }
+export const saveItem = async (req, res) => {
+  if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
 
   const { file } = req.files;
+  const fileSize = file.data.length;
   const ext = path.extname(file.name);
-  const fileName = file.md5 + ext;
+  const allowedType = ['.png', '.jpg', '.jpeg'];
 
-  if (!allowedTypes.includes(ext.toLowerCase())) {
-    return res.status(422).json({ msg: 'Invalid image type' });
+  if (!allowedType.includes(ext.toLowerCase())) {
+    return res.status(422).json({ msg: 'Invalid image format' });
   }
 
-  const fileSize = file.size;
   if (fileSize > 5000000) {
     return res.status(422).json({ msg: 'Image must be less than 5 MB' });
   }
 
-  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
-  const { title, description, price } = req.body;
+  try {
+    const cloudinaryResult = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: 'images', // You can customize the folder where the image will be stored in Cloudinary
+    });
 
-  const destinationPath = path.join(__dirname, './public/images', fileName);
+    const { title, description, price } = req.body;
 
-  file.mv(destinationPath, async (err) => {
-    if (err) {
-      return res.status(500).json({ msg: err.message });
-    }
+    // Now you can use the cloudinaryResult to save the data in your database
+    await Item.create({
+      name: title,
+      image: cloudinaryResult.public_id,
+      url: cloudinaryResult.secure_url,
+      description,
+      price,
+    });
 
-    try {
-      await Item.create({
-        name: title,
-        image: fileName,
-        url,
-        description,
-        price,
-      });
-
-      return res.status(201).json({ msg: 'Item created successfully' });
-    } catch (error) {
-      console.error(error.message);
-      return res.status(500).json({ msg: 'Internal Server Error' });
-    }
-  });
+    res.status(201).json({ msg: 'Item created successfully' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
+  }
 };
+
 export const updateItem = async (req, res) => {
   const item = await Item.findOne({
     where: {
@@ -160,10 +153,3 @@ export const deleteItem = async (req, res) => {
     console.log(error.message);
   }
 };
-
-// export const getImage = (req, res) => {
-//   const { fileName } = req.params;
-//   const imageUrl = `https://sapu-backend-mu.vercel.app/public/images/${fileName}`;
-
-//   res.json({ imageUrl });
-// };

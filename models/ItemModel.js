@@ -6,7 +6,17 @@ const { DataTypes } = Sequelize;
 
 const Item = db.define('product', {
   name: DataTypes.STRING,
-  image: DataTypes.STRING,
+  image: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+
+  },
   description: DataTypes.STRING,
   price: DataTypes.INTEGER,
   url: DataTypes.STRING,

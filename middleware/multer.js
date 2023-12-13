@@ -3,8 +3,6 @@ import multer from 'multer';
 
 const storage = multer.diskStorage({
   filename(req, file, cb) {
-    // Lakukan sesuatu dengan req jika diperlukan
-    // Misalnya, menggabungkan nama file dengan ID pengguna
     const newFileName = `${req.user.id}_${file.originalname}`;
     cb(null, newFileName);
   },

@@ -7,7 +7,6 @@ import path from 'path';
 import { Op } from 'sequelize';
 import cloudinary from '../config/cloudinary.js';
 import Item from '../models/ItemModel.js';
-import upload from '../middleware/multer.js';
 
 export const getItems = async (req, res) => {
   try {
@@ -47,52 +46,49 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
-  // Gunakan middleware multer untuk menangani unggah file
-  upload.single('file')(req, res, async (err) => {
-    if (err) {
-      return res.status(500).json({ msg: 'Error mengunggah file' });
-    }
+  try {
+    if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
 
     const name = req.body.title;
     const { file } = req.files;
-    const fileSize = file.data.length;
-    const ext = path.extname(file.name);
-    const fileName = file.md5 + ext;
-    const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
-    const { description } = req.body;
-    const { price } = req.body;
-    const allowedType = ['.png', '.jpg', '.jpeg'];
 
-    if (!allowedType.includes(ext.toLowerCase())) {
+    if (!file || !file.name) {
+      return res.status(400).json({ msg: 'Invalid file data' });
+    }
+
+    const ext = path.extname(file.name);
+    const allowedTypes = ['.png', '.jpg', '.jpeg'];
+
+    if (!allowedTypes.includes(ext.toLowerCase())) {
       return res.status(422).json({
-        msg:
-        'Invalid Images',
+        msg: 'Invalid image format',
       });
     }
-    if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
 
-    cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
-      const { secure_url } = cloudinaryResult;
-
-      try {
-        // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-        const newItem = await Item.create({
-          name,
-          image: secure_url,
-          url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
-          description,
-          price,
-        });
-
-        // Beri respons dengan data item yang baru saja dibuat
-        res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem });
-      } catch (databaseError) {
-        // Tangani kesalahan basis data, misalnya, duplikasi kunci unik
-        console.error(databaseError.message);
-        res.status(500).json({ msg: 'Kesalahan Server Internal saat menyimpan item' });
-      }
+    const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+      folder: 'SAPU', // Set your desired folder in Cloudinary
+      use_filename: true,
+      unique_filename: true,
     });
-  });
+
+    const { secure_url: url, public_id: cloudinaryId } = result;
+    const { description, price } = req.body;
+
+    await Item.create({
+      name,
+      image: cloudinaryId, // Save the Cloudinary public_id
+      url,
+      description,
+      price,
+    });
+
+    res.status(201).json({ msg: 'Item created successfully' });
+
+    // The rest of your code...
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ msg: 'Internal Server Error' });
+  }
 };
 
 export const updateItem = async (req, res) => {

@@ -54,17 +54,19 @@ export const saveItem = async (req, res) => {
     }
 
     const name = req.body.title;
-    const { file } = req; // Ganti req.files menjadi req.file
-    const fileSize = file.size; // Ganti file.data.length menjadi file.size
-    const ext = path.extname(file.originalname);
-    const fileName = file.filename; // Ganti file.md5 + ext menjadi file.filename
+    const { file } = req.files;
+    const fileSize = file.data.length;
+    const ext = path.extname(file.name);
+    const fileName = file.md5 + ext;
     const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
-    const { description, price } = req.body;
+    const { description } = req.body;
+    const { price } = req.body;
     const allowedType = ['.png', '.jpg', '.jpeg'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
       return res.status(422).json({
-        msg: 'Invalid Images',
+        msg:
+        'Invalid Images',
       });
     }
     if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
@@ -76,8 +78,8 @@ export const saveItem = async (req, res) => {
         // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
         const newItem = await Item.create({
           name,
-          image: { url: secure_url }, // Ganti image: secure_url menjadi image: { url: secure_url }
-          url,
+          image: secure_url,
+          url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
           description,
           price,
         });

@@ -47,52 +47,50 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
-  // Gunakan middleware multer untuk menangani unggah file
-  upload.single('file')(req, res, async (err) => {
-    if (err) {
-      return res.status(500).json({ msg: 'Error mengunggah file' });
-    }
-
-    const name = req.body.title;
-    const { file } = req.files;
-    const fileSize = file.data.length;
-    const ext = path.extname(file.name);
-    const fileName = file.md5 + ext;
-    const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
-    const { description } = req.body;
-    const { price } = req.body;
-    const allowedType = ['.png', '.jpg', '.jpeg'];
-
-    if (!allowedType.includes(ext.toLowerCase())) {
-      return res.status(422).json({
-        msg:
-        'Invalid Images',
-      });
-    }
-    if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
-
-    cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
-      const { secure_url } = cloudinaryResult;
-
-      try {
-        // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-        const newItem = await Item.create({
-          name,
-          image: secure_url,
-          url, // Anda dapat memodifikasi ini berdasarkan kebutuhan Anda
-          description,
-          price,
-        });
-
-        // Beri respons dengan data item yang baru saja dibuat
-        res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem });
-      } catch (databaseError) {
-        // Tangani kesalahan basis data, misalnya, duplikasi kunci unik
-        console.error(databaseError.message);
-        res.status(500).json({ msg: 'Kesalahan Server Internal saat menyimpan item' });
+  try {
+    upload.single('file')(req, res, async (err) => {
+      if (err) {
+        return res.status(500).json({ msg: 'Error mengunggah file' });
       }
+
+      const { title, body, price } = req.body;
+      const { file } = req;
+      const ext = path.extname(file.originalname);
+      const allowedTypes = ['.png', '.jpg', '.jpeg'];
+
+      if (!allowedTypes.includes(ext.toLowerCase())) {
+        return res.status(422).json({ msg: 'Invalid Image' });
+      }
+
+      const fileSize = file.size;
+      if (fileSize > 5000000) {
+        return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+      }
+
+      cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
+        const { secure_url } = cloudinaryResult;
+
+        try {
+          // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
+          const newItem = await Item.create({
+            title,
+            image: secure_url,
+            description: body,
+            price,
+          });
+
+          // Beri respons dengan data item yang baru saja dibuat
+          res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem });
+        } catch (databaseError) {
+          console.error(databaseError.message);
+          res.status(500).json({ msg: 'Kesalahan Server Internal saat menyimpan item' });
+        }
+      });
     });
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: 'Kesalahan Server Internal' });
+  }
 };
 
 export const updateItem = async (req, res) => {

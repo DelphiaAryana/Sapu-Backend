@@ -48,11 +48,11 @@ export const getItemById = async (req, res) => {
 
 export const saveItem = async (req, res) => {
   try {
-    upload.single('file')(req, res, async (err) => {
-      if (err) {
-        return res.status(500).json({ msg: 'Error mengunggah file' });
-      }
+    // eslint-disable-next-line no-undef
+    const multerUpload = util.promisify(upload.single('file'));
+    await multerUpload(req, res);
 
+    if (req.file) {
       const { title, body, price } = req.body;
       const { file } = req;
       const ext = path.extname(file.originalname);
@@ -67,26 +67,25 @@ export const saveItem = async (req, res) => {
         return res.status(422).json({ msg: 'Image must be less than 5 MB' });
       }
 
-      cloudinary.uploader.upload(file.path, async (cloudinaryResult) => {
-        const { secure_url } = cloudinaryResult;
-
-        try {
-          // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-          const newItem = await Item.create({
-            title,
-            image: secure_url,
-            description: body,
-            price,
-          });
-
-          // Beri respons dengan data item yang baru saja dibuat
-          res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem });
-        } catch (databaseError) {
-          console.error(databaseError.message);
-          res.status(500).json({ msg: 'Kesalahan Server Internal saat menyimpan item' });
-        }
+      const cloudinaryResult = await cloudinary.uploader.upload(file.path);
+      const { secure_url } = cloudinaryResult;
+      const fileName = file.originalname;
+      // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
+      const newItem = await Item.create({
+        title,
+        image: secure_url,
+        description: body,
+        price,
       });
-    });
+
+      // Sertakan URL gambar dalam respons bersama dengan data item yang baru saja dibuat
+      const apiUrl = 'https://sapu-backend-mu.vercel.app/images';
+      const imageUrl = `${apiUrl}/${fileName}`;
+
+      res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem, imageUrl });
+    } else {
+      res.status(422).json({ msg: 'File not provided' });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: 'Kesalahan Server Internal' });

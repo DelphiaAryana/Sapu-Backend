@@ -7,7 +7,7 @@ import path from 'path';
 import { Op } from 'sequelize';
 import cloudinary from '../config/cloudinary.js';
 import Item from '../models/ItemModel.js';
-import upload from '../middleware/multer.js';
+// import upload from '../middleware/multer.js';
 
 export const getItems = async (req, res) => {
   try {
@@ -46,49 +46,31 @@ export const getItemById = async (req, res) => {
   }
 };
 
-export const saveItem = async (req, res) => {
+export const createItem = async ({
+  name, description, price, url, imageBase64,
+}) => {
   try {
-    // eslint-disable-next-line no-undef
-    const multerUpload = util.promisify(upload.single('file'));
-    await multerUpload(req, res);
+    // Upload gambar ke Cloudinary
+    const cloudinaryResponse = await cloudinary.uploader.upload(imageBase64, {
+      folder: 'items', // Sesuaikan dengan folder di Cloudinary
+    });
 
-    if (req.file) {
-      const { title, body, price } = req.body;
-      const { file } = req;
-      const ext = path.extname(file.originalname);
-      const allowedTypes = ['.png', '.jpg', '.jpeg'];
+    // Simpan item ke database
+    const newItem = await Item.create({
+      name,
+      description,
+      price,
+      url,
+      image: {
+        public_id: cloudinaryResponse.public_id,
+        url: cloudinaryResponse.secure_url,
+      },
+    });
 
-      if (!allowedTypes.includes(ext.toLowerCase())) {
-        return res.status(422).json({ msg: 'Invalid Image' });
-      }
-
-      const fileSize = file.size;
-      if (fileSize > 5000000) {
-        return res.status(422).json({ msg: 'Image must be less than 5 MB' });
-      }
-
-      const cloudinaryResult = await cloudinary.uploader.upload(file.path);
-      const { secure_url } = cloudinaryResult;
-      const fileName = file.originalname;
-      // Simpan item dalam database Anda, asumsikan Anda memiliki model bernama 'Item'
-      const newItem = await Item.create({
-        title,
-        image: secure_url,
-        description: body,
-        price,
-      });
-
-      // Sertakan URL gambar dalam respons bersama dengan data item yang baru saja dibuat
-      const apiUrl = 'https://sapu-backend-mu.vercel.app/images';
-      const imageUrl = `${apiUrl}/${fileName}`;
-
-      res.status(201).json({ msg: 'Item berhasil dibuat', item: newItem, imageUrl });
-    } else {
-      res.status(422).json({ msg: 'File not provided' });
-    }
+    return newItem;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: 'Kesalahan Server Internal' });
+    throw new Error('Internal Server Error');
   }
 };
 

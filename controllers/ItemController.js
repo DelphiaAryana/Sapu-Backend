@@ -1,12 +1,30 @@
-/* eslint-disable import/no-import-module-exports */
-/* eslint-disable camelcase */
-/* eslint-disable import/extensions */
+/* eslint-disable no-shadow */
 /* eslint-disable consistent-return */
-import fs from 'fs';
+/* eslint-disable import/extensions */
 import path from 'path';
 import { Op } from 'sequelize';
-import cloudinary from '../config/cloudinary.js';
+import { initializeApp } from 'firebase/app';
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import Item from '../models/ItemModel.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyCsep7MLviWXB7C-L4zt6XI5kEgzoNrQmY',
+  authDomain: 'sapu-project-af7ea.firebaseapp.com',
+  projectId: 'sapu-project-af7ea',
+  storageBucket: 'sapu-project-af7ea.appspot.com',
+  messagingSenderId: '159292158231',
+  appId: '1:159292158231:web:f521459b29dbba0e184752',
+  measurementId: 'G-SBSGVKV41Y',
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
 
 export const getItems = async (req, res) => {
   try {
@@ -17,9 +35,7 @@ export const getItems = async (req, res) => {
     if (searchQuery) {
       queryOptions = {
         where: {
-          [Op.or]: [
-            { name: { [Op.like]: `%${searchQuery}%` } },
-          ],
+          [Op.or]: [{ name: { [Op.like]: `%${searchQuery}%` } }],
         },
       };
     }
@@ -46,48 +62,34 @@ export const getItemById = async (req, res) => {
 };
 
 export const saveItem = async (req, res) => {
+  if (req.files === null) { return res.status(400).json({ msg: 'No file uploaded' }); }
+
+  const { file } = req.files;
+  const ext = path.extname(file.name);
+  const fileName = file.md5 + ext;
+  const storageRef = ref(storage, `images/${fileName}`);
+
   try {
-    if (req.files === null) return res.status(400).json({ msg: 'No file uploaded' });
+    await uploadBytes(storageRef, file.data);
+
+    const imageUrl = await getDownloadURL(storageRef);
 
     const name = req.body.title;
-    const { file } = req.files;
-
-    if (!file || !file.name) {
-      return res.status(400).json({ msg: 'Invalid file data' });
-    }
-
-    const ext = path.extname(file.name);
-    const allowedTypes = ['.png', '.jpg', '.jpeg'];
-
-    if (!allowedTypes.includes(ext.toLowerCase())) {
-      return res.status(422).json({
-        msg: 'Invalid image format',
-      });
-    }
-
-    const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
-      folder: 'SAPU', // Set your desired folder in Cloudinary
-      use_filename: true,
-      unique_filename: true,
-    });
-
-    const { secure_url: url, public_id: cloudinaryId } = result;
-    const { description, price } = req.body;
+    const { description } = req.body;
+    const { price } = req.body;
 
     await Item.create({
       name,
-      image: cloudinaryId, // Save the Cloudinary public_id
-      url,
+      image: fileName,
+      url: imageUrl,
       description,
       price,
     });
 
     res.status(201).json({ msg: 'Item created successfully' });
-
-    // The rest of your code...
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: 'Internal Server Error' });
+    console.error('Error uploading file to Firebase Cloud Storage:', error);
+    return res.status(500).json({ msg: error.message });
   }
 };
 
@@ -97,10 +99,15 @@ export const updateItem = async (req, res) => {
       id: req.params.id,
     },
   });
+
   if (!item) return res.status(404).json({ msg: 'No Data Found' });
   let fileName = '';
+  let imageUrl = '';
+
+  // Cek apakah ada file yang diunggah
   if (req.files === null) {
     fileName = item.image;
+    imageUrl = item.url;
   } else {
     const { file } = req.files;
     const fileSize = file.data.length;
@@ -108,37 +115,50 @@ export const updateItem = async (req, res) => {
     fileName = file.md5 + ext;
     const allowedType = ['.png', '.jpg', '.jpeg'];
 
+    // Validasi tipe file dan ukuran file
     if (!allowedType.includes(ext.toLowerCase())) {
-      return res.status(422).json({
-        msg:
-            'Invalid Images',
-      });
+      return res.status(422).json({ msg: 'Invalid Images' });
     }
-    if (fileSize > 5000000) return res.status(422).json({ msg: 'Image must be less than 5 MB' });
 
-    const filepath = `./public/images/${item.image}`;
-    fs.unlinkSync(filepath);
+    if (fileSize > 5000000) {
+      return res.status(422).json({ msg: 'Image must be less than 5 MB' });
+    }
 
-    file.mv(`./public/images/${fileName}`, async (err) => {
-      if (err) return res.status(500).json({ msg: err.message });
-    });
+    // Hapus file gambar yang lama di Firebase Cloud Storage
+    const oldImageRef = ref(storage, `images/${item.image}`);
+    await deleteObject(oldImageRef);
+
+    // Upload gambar baru ke Firebase Cloud Storage
+    const newImageRef = ref(storage, `images/${fileName}`);
+    await uploadBytes(newImageRef, file.data);
+
+    // Dapatkan URL unduhan baru dari Firebase Cloud Storage
+    imageUrl = await getDownloadURL(newImageRef);
   }
   const name = req.body.title;
-  const url = `https://sapu-backend-mu.vercel.app/images/${fileName}`;
   const { description } = req.body;
   const { price } = req.body;
 
   try {
-    await Item.update({
-      name, image: fileName, url, description, price,
-    }, {
-      where: {
-        id: req.params.id,
+    // Update data item di database
+    await Item.update(
+      {
+        name,
+        image: fileName,
+        url: imageUrl,
+        description,
+        price,
       },
-    });
-    res.status(200).json({ msg: 'Item Uploaded Successfuly' });
+      {
+        where: {
+          id: req.params.id,
+        },
+      },
+    );
+    res.status(200).json({ msg: 'Item Updated Successfully' });
   } catch (error) {
     console.log(error.message);
+    return res.status(500).json({ msg: 'Internal Server Error' });
   }
 };
 
@@ -148,17 +168,26 @@ export const deleteItem = async (req, res) => {
       id: req.params.id,
     },
   });
-  if (!item) return res.status(404).json({ msg: 'No Data Found' });
+
+  if (!item) {
+    return res.status(404).json({ msg: 'No Data Found' });
+  }
+
   try {
-    const filepath = `./public/images/${item.image}`;
-    fs.unlinkSync(filepath);
+    // Hapus file gambar dari Firebase Cloud Storage
+    const storage = getStorage(app);
+    const imageRef = ref(storage, `images/${item.image}`);
+
+    // Hapus item dari database
     await Item.destroy({
       where: {
         id: req.params.id,
       },
     });
-    res.status(200).json({ msg: 'Item Deleted Successfuly' });
+    await deleteObject(imageRef);
+    res.status(200).json({ msg: 'Item Deleted Successfully' });
   } catch (error) {
     console.log(error.message);
+    return res.status(500).json({ msg: 'Internal Server Error' });
   }
 };

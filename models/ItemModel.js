@@ -1,29 +1,21 @@
 /* eslint-disable import/extensions */
-// models/item.js
-import Sequelize from 'sequelize';
-import db from '../config/database.js'; // Pastikan sesuaikan dengan konfigurasi proyek Anda
+import { Sequelize } from 'sequelize';
+import db from '../config/database.js';
 
-const Item = db.define('Item', {
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  image: {
-    type: Sequelize.JSON,
-    allowNull: false,
-  },
-  url: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  description: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  price: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-  },
+const { DataTypes } = Sequelize;
+
+const Item = db.define('product', {
+  name: DataTypes.STRING,
+  image: DataTypes.STRING,
+  description: DataTypes.STRING,
+  price: DataTypes.INTEGER,
+  url: DataTypes.STRING,
+}, {
+  freezeTableName: true,
 });
 
 export default Item;
+
+(async () => {
+  await db.sync();
+})();

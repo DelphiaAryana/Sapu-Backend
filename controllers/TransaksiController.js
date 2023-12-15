@@ -21,8 +21,6 @@ export const getTransaksi = async (req, res) => {
 
 export const getTableTransaksi = async (req, res) => {
   try {
-    const searchQuery = req.query.search;
-
     let queryOptions = {
       attributes: ['id', 'noHp', 'quantity', 'address', 'date', 'total'],
       include: [
@@ -31,6 +29,7 @@ export const getTableTransaksi = async (req, res) => {
       ],
     };
 
+    const searchQuery = req.query.search;
     if (searchQuery) {
       queryOptions.where = {
         [Op.or]: [

@@ -36,7 +36,7 @@ export const getTableTransaksi = async (req, res) => {
         [Op.or]: [
           { '$Users.name$': { [Op.like]: `%${searchQuery}%` } },
           { noHp: { [Op.like]: `%${searchQuery}%` } },
-          { '$Item.name$': { [Op.like]: `%${searchQuery}%` } },
+          { '$item.name$': { [Op.like]: `%${searchQuery}%` } },
         ],
       };
     }

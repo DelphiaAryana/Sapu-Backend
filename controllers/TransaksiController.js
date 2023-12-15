@@ -33,9 +33,9 @@ export const getTableTransaksi = async (req, res) => {
     if (searchQuery) {
       queryOptions.where = {
         [Op.or]: [
-          { '$User.name$': { [Op.like]: `%${searchQuery}%` } },
+          { '$user.name$': { [Op.like]: `%${searchQuery}%` } },
           { noHp: { [Op.like]: `%${searchQuery}%` } },
-          { '$Item.name$': { [Op.like]: `%${searchQuery}%` } },
+          { '$product.name$': { [Op.like]: `%${searchQuery}%` } },
         ],
       };
     }

@@ -98,7 +98,7 @@ GET http://localhost:4000/users?search=delphia
 
 # Search Transaksi
 ###
-GET http://localhost:4000/transaksi?search=kertas
+GET http://localhost:4000/transaksitable?search=kaleng
 
 # Search Item
 ###

@@ -94,15 +94,15 @@ PATCH  http://localhost:4000/transaksi/balance/2
 
 # Search User
 ###
-GET http://localhost:4000/users?search=adel
+GET http://localhost:4000/users?search=delphia
 
 # Search Transaksi
 ###
-GET http://localhost:4000/transaksi?search=adel
+GET http://localhost:4000/transaksi?search=kertas
 
 # Search Item
 ###
-GET http://localhost:4000/items?search=buku
+GET http://localhost:4000/items?search=kaleng
 
 
 

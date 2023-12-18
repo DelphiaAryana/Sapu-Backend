@@ -52,7 +52,9 @@ export const getUserById = async (req, res) => {
 // eslint-disable-next-line consistent-return
 export const updateUser = async (req, res) => {
   const userId = req.params.id;
-  const { name, username, email } = req.body;
+  const {
+    name, username, email, role,
+  } = req.body;
 
   try {
     const isEmailTaken = await Users.findOne({
@@ -75,6 +77,7 @@ export const updateUser = async (req, res) => {
     existingUser.name = name;
     existingUser.username = username;
     existingUser.email = email;
+    existingUser.role = role;
 
     await existingUser.save();
 

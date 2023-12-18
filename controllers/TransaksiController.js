@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import Transaksi from '../models/TransaksiModel.js';
 import Users from '../models/UserModel.js';
 import Item from '../models/ItemModel.js';
+import Riwayat from '../models/RiwayatModel.js';
 
 export const getTransaksi = async (req, res) => {
   try {
@@ -21,6 +22,8 @@ export const getTransaksi = async (req, res) => {
 
 export const getTableTransaksi = async (req, res) => {
   try {
+    const searchQuery = req.query.search;
+
     let queryOptions = {
       attributes: ['id', 'noHp', 'quantity', 'address', 'date', 'total'],
       include: [
@@ -29,13 +32,12 @@ export const getTableTransaksi = async (req, res) => {
       ],
     };
 
-    const searchQuery = req.query.search;
     if (searchQuery) {
       queryOptions.where = {
         [Op.or]: [
-          { '$user.name$': { [Op.like]: `%${searchQuery}%` } },
+          { '$User.name$': { [Op.like]: `%${searchQuery}%` } },
           { noHp: { [Op.like]: `%${searchQuery}%` } },
-          { '$product.name$': { [Op.like]: `%${searchQuery}%` } },
+          { '$Item.name$': { [Op.like]: `%${searchQuery}%` } },
         ],
       };
     }
@@ -114,11 +116,27 @@ export const updateBalance = async (req, res) => {
       return res.status(404).json({ msg: 'Pengguna tidak ditemukan' });
     }
 
+    const item = await Item.findByPk(transaksi.id_item);
+    if (!item) {
+      return res.status(404).json({ msg: 'Pengguna tidak ditemukan' });
+    }
+
     const updatedBalance = user.balance + transaksi.total;
 
     await user.update({ balance: updatedBalance });
 
     await transaksi.destroy();
+
+    await Riwayat.create({
+      id_user: user.id,
+      id_item: item.id,
+      price: item.id,
+      noHp: transaksi.noHp,
+      quantity: transaksi.quantity,
+      address: transaksi.address,
+      date: transaksi.date,
+      total: transaksi.total,
+    });
 
     res.status(200).json({ msg: 'Saldo berhasil ditambahkan, dan transaksi terhapus' });
   } catch (error) {

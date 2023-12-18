@@ -86,7 +86,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:4000/transaksi/6
+DELETE http://localhost:4000/transaksi/1
 
 # Update saldo
 ###

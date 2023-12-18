@@ -174,11 +174,9 @@ export const deleteItem = async (req, res) => {
   }
 
   try {
-    // Hapus file gambar dari Firebase Cloud Storage
     const storage = getStorage(app);
     const imageRef = ref(storage, `images/${item.image}`);
 
-    // Hapus item dari database
     await Item.destroy({
       where: {
         id: req.params.id,
